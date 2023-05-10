@@ -1080,16 +1080,14 @@ TEST_LAMBDA_SLEEP = os.path.join(THIS_FOLDER, "functions/lambda_sleep.py")
 class TestFifoQueueMapping:
     def test_fifo_behavior(
         self,
-        sqs_client,
+        aws_client,
         create_lambda_function,
-        lambda_client,
         lambda_su_role,
-        logs_client,
         cleanups,
     ):
         # create FIFO queue
         queue_name = f"test-queue-{short_uid()}.fifo"
-        create_queue_result = sqs_client.create_queue(
+        create_queue_result = aws_client.sqs.create_queue(
             QueueName=queue_name,
             Attributes={
                 "FifoQueue": "true",
@@ -1098,7 +1096,7 @@ class TestFifoQueueMapping:
             },
         )
         queue_url = create_queue_result["QueueUrl"]
-        queue_arn = sqs_client.get_queue_attributes(
+        queue_arn = aws_client.sqs.get_queue_attributes(
             QueueUrl=queue_url, AttributeNames=["QueueArn"]
         )["Attributes"]["QueueArn"]
 
@@ -1117,26 +1115,26 @@ class TestFifoQueueMapping:
         )
 
         # create event source mapping
-        create_esm_result = lambda_client.create_event_source_mapping(
+        create_esm_result = aws_client.awslambda.create_event_source_mapping(
             FunctionName=function_name, EventSourceArn=queue_arn, Enabled=False, BatchSize=1
         )
         esm_uuid = create_esm_result["UUID"]
-        cleanups.append(lambda: lambda_client.delete_event_source_mapping(UUID=esm_uuid))
+        cleanups.append(lambda: aws_client.awslambda.delete_event_source_mapping(UUID=esm_uuid))
 
         # send messages
         for i in range(5):
-            sqs_client.send_message(
+            aws_client.sqs.send_message(
                 QueueUrl=queue_url, MessageBody=f"message-{i}", MessageGroupId=message_group_id
             )
 
         # enable event source mapping
-        lambda_client.update_event_source_mapping(UUID=esm_uuid, Enabled=True)
-        _await_event_source_mapping_enabled(lambda_client, esm_uuid)
+        aws_client.awslambda.update_event_source_mapping(UUID=esm_uuid, Enabled=True)
+        _await_event_source_mapping_enabled(aws_client.awslambda, esm_uuid)
 
         # since the lambda has to be called in-order anyway, there shouldn't be any parallel executions
         log_group_name = f"/aws/lambda/{function_name}"
 
         time.sleep(60)
 
-        log_streams = logs_client.describe_log_streams(logGroupName=log_group_name)
+        log_streams = aws_client.logs.describe_log_streams(logGroupName=log_group_name)
         assert len(log_streams["logStreams"]) == 1
