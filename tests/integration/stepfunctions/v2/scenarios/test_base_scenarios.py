@@ -1,17 +1,11 @@
 import json
 
-import pytest
-
 from localstack.testing.pytest import markers
 from tests.integration.stepfunctions.conftest import SfnNoneRecursiveParallelTransformer
 from tests.integration.stepfunctions.templates.scenarios.scenarios_templates import (
     ScenariosTemplate as ST,
 )
-from tests.integration.stepfunctions.utils import create_and_record_execution, is_old_provider
-
-pytestmark = pytest.mark.skipif(
-    condition=is_old_provider(), reason="Test suite for v2 provider only."
-)
+from tests.integration.stepfunctions.utils import create_and_record_execution
 
 
 @markers.snapshot.skip_snapshot_verify(

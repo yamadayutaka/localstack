@@ -6,10 +6,10 @@ from localstack.testing.pytest import markers
 from tests.integration.stepfunctions.templates.services.services_templates import (
     ServicesTemplates as ST,
 )
-from tests.integration.stepfunctions.utils import create_and_record_execution, is_old_provider
+from tests.integration.stepfunctions.utils import create_and_record_execution, is_legacy_provider
 
 pytestmark = pytest.mark.skipif(
-    condition=is_old_provider(), reason="Test suite for v2 provider only."
+    condition=is_legacy_provider(), reason="Test suite for v2 provider only."
 )
 
 

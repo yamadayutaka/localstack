@@ -9,11 +9,7 @@ from localstack.utils.strings import short_uid
 from tests.integration.stepfunctions.templates.services.services_templates import (
     ServicesTemplates as ST,
 )
-from tests.integration.stepfunctions.utils import create_and_record_execution, is_old_provider
-
-pytestmark = pytest.mark.skipif(
-    condition=is_old_provider(), reason="Test suite for v2 provider only."
-)
+from tests.integration.stepfunctions.utils import create_and_record_execution
 
 
 @markers.snapshot.skip_snapshot_verify(

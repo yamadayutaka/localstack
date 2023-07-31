@@ -15,15 +15,11 @@ LOG = logging.getLogger(__name__)
 _DELETION_TIMEOUT_SECS: Final[int] = 120
 
 
-def is_old_provider():
+def is_legacy_provider():
     return (
         os.environ.get("TEST_TARGET") != "AWS_CLOUD"
-        and os.environ.get("PROVIDER_OVERRIDE_STEPFUNCTIONS") != "v2"
+        and os.environ.get("PROVIDER_OVERRIDE_STEPFUNCTIONS") == "legacy"
     )
-
-
-def is_new_provider():
-    return not is_old_provider()
 
 
 def await_no_state_machines_listed(stepfunctions_client):
