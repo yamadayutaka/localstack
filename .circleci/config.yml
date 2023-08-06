@@ -410,6 +410,9 @@ workflows:
       - itest-lambda-legacy-local:
           requires:
             - preflight
+      - itest-sfn-legacy-provider:
+          requires:
+            - preflight
       - itest-s3-stream-provider:
           requires:
             - preflight
