@@ -453,6 +453,7 @@ workflows:
       - report:
           requires:
             - itest-lambda-legacy-local
+            - itest-sfn-legacy-provider
             - docker-test-amd64
             - docker-test-arm64
             - collect-not-implemented
@@ -463,6 +464,7 @@ workflows:
               only: master
           requires:
             - itest-lambda-legacy-local
+            - itest-sfn-legacy-provider
             - docker-test-amd64
             - docker-test-arm64
             - unit-tests
