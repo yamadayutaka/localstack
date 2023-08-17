@@ -1824,6 +1824,21 @@ class InstanceType(str):
     c7gn_8xlarge = "c7gn.8xlarge"
     c7gn_12xlarge = "c7gn.12xlarge"
     c7gn_16xlarge = "c7gn.16xlarge"
+    p5_48xlarge = "p5.48xlarge"
+    m7i_large = "m7i.large"
+    m7i_xlarge = "m7i.xlarge"
+    m7i_2xlarge = "m7i.2xlarge"
+    m7i_4xlarge = "m7i.4xlarge"
+    m7i_8xlarge = "m7i.8xlarge"
+    m7i_12xlarge = "m7i.12xlarge"
+    m7i_16xlarge = "m7i.16xlarge"
+    m7i_24xlarge = "m7i.24xlarge"
+    m7i_48xlarge = "m7i.48xlarge"
+    m7i_flex_large = "m7i-flex.large"
+    m7i_flex_xlarge = "m7i-flex.xlarge"
+    m7i_flex_2xlarge = "m7i-flex.2xlarge"
+    m7i_flex_4xlarge = "m7i-flex.4xlarge"
+    m7i_flex_8xlarge = "m7i-flex.8xlarge"
 
 
 class InstanceTypeHypervisor(str):
@@ -6445,6 +6460,7 @@ class LaunchTemplateInstanceNetworkInterfaceSpecificationRequest(TypedDict, tota
     Ipv4PrefixCount: Optional[Integer]
     Ipv6Prefixes: Optional[Ipv6PrefixList]
     Ipv6PrefixCount: Optional[Integer]
+    PrimaryIpv6: Optional[Boolean]
 
 
 LaunchTemplateInstanceNetworkInterfaceSpecificationRequestList = List[
@@ -6680,6 +6696,7 @@ Ipv4PrefixListResponse = List[Ipv4PrefixSpecificationResponse]
 
 class InstanceIpv6Address(TypedDict, total=False):
     Ipv6Address: Optional[String]
+    IsPrimaryIpv6: Optional[Boolean]
 
 
 InstanceIpv6AddressList = List[InstanceIpv6Address]
@@ -6705,6 +6722,7 @@ class LaunchTemplateInstanceNetworkInterfaceSpecification(TypedDict, total=False
     Ipv4PrefixCount: Optional[Integer]
     Ipv6Prefixes: Optional[Ipv6PrefixListResponse]
     Ipv6PrefixCount: Optional[Integer]
+    PrimaryIpv6: Optional[Boolean]
 
 
 LaunchTemplateInstanceNetworkInterfaceSpecificationList = List[
@@ -7151,6 +7169,7 @@ class CreateNetworkInterfaceRequest(ServiceRequest):
     SubnetId: SubnetId
     TagSpecifications: Optional[TagSpecificationList]
     ClientToken: Optional[String]
+    EnablePrimaryIpv6: Optional[Boolean]
 
 
 class Ipv6PrefixSpecification(TypedDict, total=False):
@@ -7182,6 +7201,7 @@ NetworkInterfacePrivateIpAddressList = List[NetworkInterfacePrivateIpAddress]
 
 class NetworkInterfaceIpv6Address(TypedDict, total=False):
     Ipv6Address: Optional[String]
+    IsPrimaryIpv6: Optional[Boolean]
 
 
 NetworkInterfaceIpv6AddressesList = List[NetworkInterfaceIpv6Address]
@@ -12487,6 +12507,7 @@ class InstanceNetworkInterfaceSpecification(TypedDict, total=False):
     Ipv4PrefixCount: Optional[Integer]
     Ipv6Prefixes: Optional[Ipv6PrefixList]
     Ipv6PrefixCount: Optional[Integer]
+    PrimaryIpv6: Optional[Boolean]
 
 
 InstanceNetworkInterfaceSpecificationList = List[InstanceNetworkInterfaceSpecification]
@@ -15841,6 +15862,7 @@ class ModifyNetworkInterfaceAttributeRequest(ServiceRequest):
     NetworkInterfaceId: NetworkInterfaceId
     SourceDestCheck: Optional[AttributeBooleanValue]
     EnaSrdSpecification: Optional[EnaSrdSpecification]
+    EnablePrimaryIpv6: Optional[Boolean]
 
 
 class ModifyPrivateDnsNameOptionsRequest(ServiceRequest):
@@ -17034,6 +17056,7 @@ class RunInstancesRequest(ServiceRequest):
     PrivateDnsNameOptions: Optional[PrivateDnsNameOptionsRequest]
     MaintenanceOptions: Optional[InstanceMaintenanceOptionsRequest]
     DisableApiStop: Optional[Boolean]
+    EnablePrimaryIpv6: Optional[Boolean]
 
 
 ScheduledInstancesSecurityGroupIdSet = List[SecurityGroupId]
@@ -18458,6 +18481,7 @@ class Ec2Api:
         interface_type: NetworkInterfaceCreationType = None,
         tag_specifications: TagSpecificationList = None,
         client_token: String = None,
+        enable_primary_ipv6: Boolean = None,
     ) -> CreateNetworkInterfaceResult:
         raise NotImplementedError
 
@@ -22794,6 +22818,7 @@ class Ec2Api:
         groups: SecurityGroupIdStringList = None,
         source_dest_check: AttributeBooleanValue = None,
         ena_srd_specification: EnaSrdSpecification = None,
+        enable_primary_ipv6: Boolean = None,
     ) -> None:
         raise NotImplementedError
 
@@ -23767,6 +23792,7 @@ class Ec2Api:
         private_dns_name_options: PrivateDnsNameOptionsRequest = None,
         maintenance_options: InstanceMaintenanceOptionsRequest = None,
         disable_api_stop: Boolean = None,
+        enable_primary_ipv6: Boolean = None,
     ) -> Reservation:
         raise NotImplementedError
 

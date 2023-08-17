@@ -5,7 +5,6 @@ import socket
 import subprocess
 import tempfile
 import time
-from dataclasses import dataclass
 from typing import Any, Dict, List, Mapping, Optional, Tuple, TypeVar, Union
 
 from localstack import constants
@@ -353,6 +352,7 @@ OVERRIDE_IN_DOCKER = parse_boolean_env("OVERRIDE_IN_DOCKER")
 
 is_in_docker = in_docker()
 is_in_linux = is_linux()
+default_ip = "0.0.0.0" if is_in_docker else "127.0.0.1"
 
 # CLI specific: the configuration profile to load
 CONFIG_PROFILE = os.environ.get("CONFIG_PROFILE", "").strip()
@@ -368,7 +368,7 @@ except ImportError:
     # dotenv may not be available in lambdas or other environments where config is loaded
     LOADED_PROFILE = None
 
-# default AWS region
+# default AWS region (DEPRECATED!)
 DEFAULT_REGION = (
     os.environ.get("DEFAULT_REGION") or os.environ.get("AWS_DEFAULT_REGION") or AWS_REGION_US_EAST_1
 )
@@ -401,7 +401,7 @@ VOLUME_DIR = os.environ.get("LOCALSTACK_VOLUME_DIR", "").strip() or TMP_FOLDER
 if TMP_FOLDER.startswith("/var/folders/") and os.path.exists("/private%s" % TMP_FOLDER):
     TMP_FOLDER = "/private%s" % TMP_FOLDER
 
-# temporary folder of the host (required when running in Docker). Fall back to local tmp folder if not set
+# temporary folder of the host (required when running in Docker). Fall back to local tmp folder if not set. (DEPRECATED!)
 HOST_TMP_FOLDER = os.environ.get("HOST_TMP_FOLDER", TMP_FOLDER)
 
 # whether to enable verbose debug logging
@@ -430,10 +430,13 @@ LEGACY_S3_PROVIDER = os.environ.get("PROVIDER_OVERRIDE_S3", "") == "legacy"
 # whether the S3 streaming provider is enabled (beware, it breaks persistence for now)
 STREAM_S3_PROVIDER = os.environ.get("PROVIDER_OVERRIDE_S3", "") == "stream"
 
+# whether the S3 native provider is enabled (beware, it breaks persistence for now)
+NATIVE_S3_PROVIDER = os.environ.get("PROVIDER_OVERRIDE_S3", "") == "v3"
+
 # Whether to report internal failures as 500 or 501 errors.
 FAIL_FAST = is_env_true("FAIL_FAST")
 
-# whether to use the legacy single-region mode, defined via DEFAULT_REGION
+# whether to use the legacy single-region mode, defined via DEFAULT_REGION (DEPRECATED!)
 USE_SINGLE_REGION = is_env_true("USE_SINGLE_REGION")
 
 # whether to run in TF compatibility mode for TF integration tests
@@ -491,37 +494,79 @@ HOSTNAME_EXTERNAL = os.environ.get("HOSTNAME_EXTERNAL", "").strip() or LOCALHOST
 LOCALSTACK_HOSTNAME = os.environ.get("LOCALSTACK_HOSTNAME", "").strip() or LOCALHOST
 
 
-def parse_hostname_and_ip(
-    value: str, default_host: str, default_port: int = constants.DEFAULT_PORT_EDGE
-) -> str:
+class HostAndPort:
     """
-    Given a string that should contain a <hostname>:<port>, if either are
-    absent then use the defaults.
-    """
-    host, port = default_host, default_port
-    if ":" in value:
-        hostname, port_s = value.split(":", 1)
-        if hostname.strip():
-            host = hostname.strip()
-        try:
-            port = int(port_s)
-        except (ValueError, TypeError):
-            pass
-    else:
-        if value.strip():
-            host = value.strip()
+    Definition of an address for a server to listen to.
 
-    return f"{host}:{port}"
+    Includes a `parse` method to convert from `str`, allowing for default fallbacks, as well as
+    some helper methods to help tests - particularly testing for equality and a hash function
+    so that `HostAndPort` instances can be used as keys to dictionaries.
+    """
+
+    host: str
+    port: int
+
+    def __init__(self, host: str, port: int):
+        self.host = host
+        self.port = port
+
+    @classmethod
+    def parse(
+        cls,
+        input: str,
+        default_host: str,
+        default_port: int,
+    ) -> "HostAndPort":
+        """
+        Parse a `HostAndPort` from strings like:
+            - 0.0.0.0:4566 -> host=0.0.0.0, port=4566
+            - 0.0.0.0      -> host=0.0.0.0, port=`default_port`
+            - :4566        -> host=`default_host`, port=4566
+        """
+        host, port = default_host, default_port
+        if ":" in input:
+            hostname, port_s = input.split(":", 1)
+            if hostname.strip():
+                host = hostname.strip()
+            try:
+                port = int(port_s)
+            except ValueError as e:
+                raise ValueError(f"specified port {port_s} not a number") from e
+        else:
+            if input.strip():
+                host = input.strip()
+
+        # validation
+        if port < 0 or port >= 2**16:
+            raise ValueError("port out of range")
+
+        return cls(host=host, port=port)
+
+    def is_unprivileged(self) -> bool:
+        return self.port >= 1024
+
+    def __hash__(self) -> int:
+        return hash((self.host, self.port))
+
+    # easier tests
+    def __eq__(self, other: "str | HostAndPort") -> bool:
+        if isinstance(other, self.__class__):
+            return self.host == other.host and self.port == other.port
+        elif isinstance(other, str):
+            return str(self) == other
+        else:
+            raise TypeError(f"cannot compare {self.__class__} to {other.__class__}")
+
+    def __str__(self) -> str:
+        return f"{self.host}:{self.port}" if self.port is not None else self.host
+
+    def __repr__(self) -> str:
+        return f"HostAndPort(host={self.host}, port={self.port})"
 
 
 def populate_legacy_edge_configuration(
-    environment: Dict[str, str]
-) -> Tuple[str, str, str, int, int]:
-    if is_in_docker:
-        default_ip = "0.0.0.0"
-    else:
-        default_ip = "127.0.0.1"
-
+    environment: Mapping[str, str]
+) -> Tuple[HostAndPort, List[HostAndPort], str, int, int]:
     localstack_host_raw = environment.get("LOCALSTACK_HOST")
     gateway_listen_raw = environment.get("GATEWAY_LISTEN")
 
@@ -529,38 +574,15 @@ def populate_legacy_edge_configuration(
     # populate LOCALSTACK_HOST first since GATEWAY_LISTEN may be derived from LOCALSTACK_HOST
     localstack_host = localstack_host_raw
     if localstack_host is None:
-        localstack_host = f"{constants.LOCALHOST_HOSTNAME}:{constants.DEFAULT_PORT_EDGE}"
+        localstack_host = HostAndPort(
+            host=constants.LOCALHOST_HOSTNAME, port=constants.DEFAULT_PORT_EDGE
+        )
     else:
-        localstack_host = parse_hostname_and_ip(
+        localstack_host = HostAndPort.parse(
             localstack_host,
             default_host=constants.LOCALHOST_HOSTNAME,
+            default_port=constants.DEFAULT_PORT_EDGE,
         )
-
-    gateway_listen = gateway_listen_raw
-    if gateway_listen is None:
-        # default to existing behaviour
-        try:
-            port = int(localstack_host.split(":", 1)[-1])
-        except ValueError:
-            port = constants.DEFAULT_PORT_EDGE
-        gateway_listen = f"{default_ip}:{port}"
-    else:
-        components = gateway_listen.split(",")
-        if len(components) > 1:
-            LOG.warning("multiple GATEWAY_LISTEN addresses are not currently supported")
-
-        gateway_listen = ",".join(
-            [
-                parse_hostname_and_ip(
-                    component.strip(),
-                    default_host=default_ip,
-                )
-                for component in components
-            ]
-        )
-
-    assert gateway_listen is not None
-    assert localstack_host is not None
 
     def legacy_fallback(envar_name: str, default: T) -> T:
         result = default
@@ -570,39 +592,36 @@ def populate_legacy_edge_configuration(
 
         return result
 
+    # parse gateway listen from multiple components
+    if gateway_listen_raw is not None:
+        gateway_listen = []
+        for address in gateway_listen_raw.split(","):
+            gateway_listen.append(
+                HostAndPort.parse(
+                    address.strip(),
+                    default_host=default_ip,
+                    default_port=localstack_host.port,
+                )
+            )
+    else:
+        edge_port = int(environment.get("EDGE_PORT", localstack_host.port))
+        edge_port_http = int(environment.get("EDGE_PORT_HTTP", 0))
+        gateway_listen = [HostAndPort(host=default_ip, port=edge_port)]
+        if edge_port_http:
+            gateway_listen.append(HostAndPort(host=default_ip, port=edge_port_http))
+
+    assert gateway_listen is not None
+    assert localstack_host is not None
+
     # derive legacy variables from GATEWAY_LISTEN unless GATEWAY_LISTEN is not given and
     # legacy variables are
-    edge_bind_host = legacy_fallback("EDGE_BIND_HOST", get_gateway_listen(gateway_listen)[0].host)
-    edge_port = int(legacy_fallback("EDGE_PORT", get_gateway_listen(gateway_listen)[0].port))
+    edge_bind_host = legacy_fallback("EDGE_BIND_HOST", gateway_listen[0].host)
+    edge_port = int(legacy_fallback("EDGE_PORT", gateway_listen[0].port))
     edge_port_http = int(
         legacy_fallback("EDGE_PORT_HTTP", 0),
     )
 
     return localstack_host, gateway_listen, edge_bind_host, edge_port, edge_port_http
-
-
-@dataclass
-class HostAndPort:
-    host: str
-    port: int
-
-    @classmethod
-    def parse(cls, input: str) -> "HostAndPort":
-        host, port_s = input.split(":")
-        return cls(host=host, port=int(port_s))
-
-    def __eq__(self, other: Any) -> bool:
-        if not isinstance(other, self.__class__):
-            return False
-
-        return self.host == other.host and self.port == other.port
-
-
-def get_gateway_listen(gateway_listen: str) -> List[HostAndPort]:
-    result = []
-    for bind_address in gateway_listen.split(","):
-        result.append(HostAndPort.parse(bind_address))
-    return result
 
 
 # How to access LocalStack
@@ -867,7 +886,7 @@ LAMBDA_CONTAINER_REGISTRY = (
 )
 
 # PUBLIC: base images for Lambda (default) https://docs.aws.amazon.com/lambda/latest/dg/runtimes-images.html
-# localstack/services/awslambda/invocation/lambda_models.py:IMAGE_MAPPING
+# localstack/services/lambda_/invocation/lambda_models.py:IMAGE_MAPPING
 # Customize the Docker image of Lambda runtimes, either by:
 # a) pattern with <runtime> placeholder, e.g. custom-repo/lambda-<runtime>:2022
 # b) json dict mapping the <runtime> to an image, e.g. {"python3.9": "custom-repo/lambda-py:thon3.9"}
@@ -1005,6 +1024,7 @@ KMS_PROVIDER = (os.environ.get("KMS_PROVIDER") or "").strip() or "moto"
 
 # URL to a custom OpenSearch/Elasticsearch backend cluster. If this is set to a valid URL, then localstack will not
 # create OpenSearch/Elasticsearch cluster instances, but instead forward all domains to the given backend.
+# `ES_CUSTOM_BACKEND` is DEPRECATED!
 OPENSEARCH_CUSTOM_BACKEND = (
     os.environ.get("OPENSEARCH_CUSTOM_BACKEND", "").strip()
     or os.environ.get("ES_CUSTOM_BACKEND", "").strip()
@@ -1012,6 +1032,7 @@ OPENSEARCH_CUSTOM_BACKEND = (
 
 # Strategy used when creating OpenSearch/Elasticsearch domain endpoints routed through the edge proxy
 # valid values: domain | path | port (off)
+# `ES_ENDPOINT_STRATEGY` is DEPRECATED!
 OPENSEARCH_ENDPOINT_STRATEGY = (
     os.environ.get("OPENSEARCH_ENDPOINT_STRATEGY", "").strip()
     or os.environ.get("ES_ENDPOINT_STRATEGY", "").strip()
@@ -1021,6 +1042,7 @@ if OPENSEARCH_ENDPOINT_STRATEGY == "off":
     OPENSEARCH_ENDPOINT_STRATEGY = "port"
 
 # Whether to start one cluster per domain (default), or multiplex opensearch domains to a single clusters
+# `ES_MULTI_CLUSTER` is DEPRECATED!
 OPENSEARCH_MULTI_CLUSTER = is_env_not_false("OPENSEARCH_MULTI_CLUSTER") or is_env_true(
     "ES_MULTI_CLUSTER"
 )
@@ -1110,7 +1132,7 @@ CONFIG_ENV_VARS = [
     "LAMBDA_INIT_BOOTSTRAP_PATH",
     "LAMBDA_INIT_DELVE_PATH",
     "LAMBDA_INIT_DELVE_PORT",
-    "LAMBDA_INIT_POST_INVOKE_WAIT",
+    "LAMBDA_INIT_POST_INVOKE_WAIT_MS",
     "LAMBDA_INIT_USER",
     "LAMBDA_INIT_RELEASE_VERSION",
     "LAMBDA_KEEPALIVE_MS",
@@ -1169,8 +1191,6 @@ CONFIG_ENV_VARS = [
     "SYNCHRONOUS_KINESIS_EVENTS",
     "SYNCHRONOUS_SNS_EVENTS",
     "TEST_AWS_ACCOUNT_ID",
-    "TEST_IAM_USER_ID",
-    "TEST_IAM_USER_NAME",
     "TF_COMPAT_MODE",
     "USE_SINGLE_REGION",
     "USE_SSL",
@@ -1256,6 +1276,8 @@ def external_service_url(service_key, host=None, port=None):
     return service_url(service_key, host=host, port=port)
 
 
+# FIXME: we don't separate http and non-http ports any more,
+#        so this function should be removed
 def get_edge_port_http():
     return EDGE_PORT_HTTP or EDGE_PORT
 

@@ -408,6 +408,7 @@ class ContainerConfiguration:
     name: Optional[str] = None
     volumes: Optional[VolumeMappings] = None
     ports: Optional[PortMappings] = None
+    exposed_ports: Optional[List[str]] = None
     entrypoint: Optional[str] = None
     additional_flags: Optional[str] = None
     command: Optional[List[str]] = None
@@ -454,8 +455,6 @@ class DockerRunFlags:
 # TODO: remove Docker/Podman compatibility switches (in particular strip_wellknown_repo_prefixes=...)
 #  from the container client base interface and introduce derived Podman client implementations instead!
 class ContainerClient(metaclass=ABCMeta):
-    STOP_TIMEOUT = 0
-
     @abstractmethod
     def get_system_info(self) -> dict:
         """Returns the docker system-wide information as dictionary (``docker info``)."""
@@ -515,11 +514,10 @@ class ContainerClient(metaclass=ABCMeta):
         return ip
 
     @abstractmethod
-    def stop_container(self, container_name: str, timeout: int = None):
+    def stop_container(self, container_name: str, timeout: int = 10):
         """Stops container with given name
         :param container_name: Container identifier (name or id) of the container to be stopped
         :param timeout: Timeout after which SIGKILL is sent to the container.
-                        If not specified, defaults to `STOP_TIMEOUT`
         """
 
     @abstractmethod
@@ -778,6 +776,7 @@ class ContainerClient(metaclass=ABCMeta):
             command=container_config.command,
             mount_volumes=container_config.volumes,
             ports=container_config.ports,
+            exposed_ports=container_config.exposed_ports,
             env_vars=container_config.env_vars,
             user=container_config.user,
             cap_add=container_config.cap_add,
@@ -805,6 +804,7 @@ class ContainerClient(metaclass=ABCMeta):
         command: Optional[Union[List[str], str]] = None,
         mount_volumes: Optional[Union[VolumeMappings, List[SimpleVolumeBind]]] = None,
         ports: Optional[PortMappings] = None,
+        exposed_ports: Optional[List[str]] = None,
         env_vars: Optional[Dict[str, str]] = None,
         user: Optional[str] = None,
         cap_add: Optional[List[str]] = None,
@@ -838,6 +838,7 @@ class ContainerClient(metaclass=ABCMeta):
         command: Optional[Union[List[str], str]] = None,
         mount_volumes: Optional[Union[VolumeMappings, List[SimpleVolumeBind]]] = None,
         ports: Optional[PortMappings] = None,
+        exposed_ports: Optional[List[str]] = None,
         env_vars: Optional[Dict[str, str]] = None,
         user: Optional[str] = None,
         cap_add: Optional[List[str]] = None,
@@ -873,6 +874,7 @@ class ContainerClient(metaclass=ABCMeta):
             command=container_config.command,
             mount_volumes=container_config.volumes,
             ports=container_config.ports,
+            exposed_ports=container_config.exposed_ports,
             env_vars=container_config.env_vars,
             user=container_config.user,
             cap_add=container_config.cap_add,

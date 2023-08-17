@@ -181,7 +181,6 @@ X_Amz_Expires = int
 HttpMethod = str
 ResourceType = str
 MissingHeaderName = str
-Method = str
 
 
 class AnalyticsS3ExportFileFormat(str):
@@ -588,7 +587,7 @@ class BucketAlreadyExists(ServiceException):
 class BucketAlreadyOwnedByYou(ServiceException):
     code: str = "BucketAlreadyOwnedByYou"
     sender_fault: bool = False
-    status_code: int = 400
+    status_code: int = 409
     BucketName: Optional[BucketName]
 
 
@@ -612,6 +611,8 @@ class NoSuchKey(ServiceException):
     sender_fault: bool = False
     status_code: int = 404
     Key: Optional[ObjectKey]
+    DeleteMarker: Optional[DeleteMarker]
+    VersionId: Optional[ObjectVersionId]
 
 
 class NoSuchUpload(ServiceException):
@@ -645,6 +646,14 @@ class InvalidBucketName(ServiceException):
     sender_fault: bool = False
     status_code: int = 400
     BucketName: Optional[BucketName]
+
+
+class NoSuchVersion(ServiceException):
+    code: str = "NoSuchVersion"
+    sender_fault: bool = False
+    status_code: int = 404
+    VersionId: Optional[ObjectVersionId]
+    Key: Optional[ObjectKey]
 
 
 class PreconditionFailed(ServiceException):
@@ -771,8 +780,11 @@ class MethodNotAllowed(ServiceException):
     code: str = "MethodNotAllowed"
     sender_fault: bool = False
     status_code: int = 405
-    Method: Optional[Method]
+    Method: Optional[HttpMethod]
     ResourceType: Optional[ResourceType]
+    DeleteMarker: Optional[DeleteMarker]
+    VersionId: Optional[ObjectVersionId]
+    Allow: Optional[HttpMethod]
 
 
 class CrossLocationLoggingProhibitted(ServiceException):
@@ -787,6 +799,87 @@ class InvalidTargetBucketForLogging(ServiceException):
     sender_fault: bool = False
     status_code: int = 400
     TargetBucket: Optional[BucketName]
+
+
+class BucketNotEmpty(ServiceException):
+    code: str = "BucketNotEmpty"
+    sender_fault: bool = False
+    status_code: int = 409
+    BucketName: Optional[BucketName]
+
+
+ProposedSize = int
+MinSizeAllowed = int
+
+
+class EntityTooSmall(ServiceException):
+    code: str = "EntityTooSmall"
+    sender_fault: bool = False
+    status_code: int = 400
+    ETag: Optional[ETag]
+    MinSizeAllowed: Optional[MinSizeAllowed]
+    PartNumber: Optional[PartNumber]
+    ProposedSize: Optional[ProposedSize]
+
+
+class InvalidPart(ServiceException):
+    code: str = "InvalidPart"
+    sender_fault: bool = False
+    status_code: int = 400
+    ETag: Optional[ETag]
+    UploadId: Optional[MultipartUploadId]
+    PartNumber: Optional[PartNumber]
+
+
+class NoSuchTagSet(ServiceException):
+    code: str = "NoSuchTagSet"
+    sender_fault: bool = False
+    status_code: int = 404
+    BucketName: Optional[BucketName]
+
+
+class InvalidTag(ServiceException):
+    code: str = "InvalidTag"
+    sender_fault: bool = False
+    status_code: int = 400
+    TagKey: Optional[ObjectKey]
+    TagValue: Optional[Value]
+
+
+class ObjectLockConfigurationNotFoundError(ServiceException):
+    code: str = "ObjectLockConfigurationNotFoundError"
+    sender_fault: bool = False
+    status_code: int = 404
+    BucketName: Optional[BucketName]
+
+
+class InvalidPartNumber(ServiceException):
+    code: str = "InvalidPartNumber"
+    sender_fault: bool = False
+    status_code: int = 416
+    PartNumberRequested: Optional[PartNumber]
+    ActualPartCount: Optional[PartNumber]
+
+
+class OwnershipControlsNotFoundError(ServiceException):
+    code: str = "OwnershipControlsNotFoundError"
+    sender_fault: bool = False
+    status_code: int = 404
+    BucketName: Optional[BucketName]
+
+
+class NoSuchPublicAccessBlockConfiguration(ServiceException):
+    code: str = "NoSuchPublicAccessBlockConfiguration"
+    sender_fault: bool = False
+    status_code: int = 404
+    BucketName: Optional[BucketName]
+
+
+class NoSuchBucketPolicy(ServiceException):
+    code: str = "NoSuchBucketPolicy"
+    sender_fault: bool = False
+    status_code: int = 404
+    BucketName: Optional[BucketName]
 
 
 AbortDate = datetime
@@ -2169,6 +2262,7 @@ class HeadObjectOutput(TypedDict, total=False):
     ObjectLockMode: Optional[ObjectLockMode]
     ObjectLockRetainUntilDate: Optional[ObjectLockRetainUntilDate]
     ObjectLockLegalHoldStatus: Optional[ObjectLockLegalHoldStatus]
+    StatusCode: Optional[GetObjectResponseStatusCode]
 
 
 class HeadObjectRequest(ServiceRequest):

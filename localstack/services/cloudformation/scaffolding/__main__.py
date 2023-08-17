@@ -153,7 +153,7 @@ class SchemaProvider:
 
 
 LOCALSTACK_ROOT_DIR = Path(__file__).parent.joinpath("../../../..").resolve()
-TESTS_ROOT_DIR = LOCALSTACK_ROOT_DIR.joinpath("tests/integration/cloudformation/resource_providers")
+TESTS_ROOT_DIR = LOCALSTACK_ROOT_DIR.joinpath("tests/aws/cloudformation/resource_providers")
 
 
 def template_path(
@@ -180,7 +180,7 @@ def template_path(
 
     if root:
         test_path = LOCALSTACK_ROOT_DIR.joinpath(
-            f"tests/integration/cloudformation/resource_providers/{resource_name.python_compatible_service_name.lower()}/{resource_name.path_compatible_full_name()}"
+            f"tests/aws/cloudformation/resource_providers/{resource_name.python_compatible_service_name.lower()}/{resource_name.path_compatible_full_name()}"
         ).resolve()
 
         common_root = os.path.relpath(output_path, test_path)
@@ -253,7 +253,7 @@ class TemplateRenderer:
         # e.g. .../resource_providers/aws_iam_role/test_X.py vs. .../resource_providers/iam/test_X.py
         # add extra parameters
         tests_output_path = LOCALSTACK_ROOT_DIR.joinpath(
-            f"tests/integration/cloudformation/resource_providers/{resource_name.python_compatible_service_name.lower()}/{resource_name.full_name.lower()}"
+            f"tests/aws/cloudformation/resource_providers/{resource_name.python_compatible_service_name.lower()}/{resource_name.full_name.lower()}"
         )
         match file_type:
             case FileType.getatt_test:
@@ -749,7 +749,7 @@ def generate(resource_type: str, write: bool, write_tests: bool):
         "Resource types: https://docs.aws.amazon.com/cloudformation-cli/latest/userguide/resource-types.html"
     )
     console.print(
-        # awslambda should become lambda (re-use the same list we use for generating the models)
+        # lambda_ should become lambda (re-use the same list we use for generating the models)
         f"Resource reference: https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-{resource_name.service.lower()}-{resource_name.resource.lower()}.html\n"
     )
     console.print("Wondering where to get started?")

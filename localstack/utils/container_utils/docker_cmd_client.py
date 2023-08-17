@@ -111,9 +111,7 @@ class CmdDockerClient(ContainerClient):
         else:
             return DockerContainerStatus.DOWN
 
-    def stop_container(self, container_name: str, timeout: int = None) -> None:
-        if timeout is None:
-            timeout = self.STOP_TIMEOUT
+    def stop_container(self, container_name: str, timeout: int = 10) -> None:
         cmd = self._docker_cmd()
         cmd += ["stop", "--time", str(timeout), container_name]
         LOG.debug("Stopping container with cmd %s", cmd)
@@ -711,6 +709,7 @@ class CmdDockerClient(ContainerClient):
         command: Optional[Union[List[str], str]] = None,
         mount_volumes: Optional[List[SimpleVolumeBind]] = None,
         ports: Optional[PortMappings] = None,
+        exposed_ports: Optional[List[str]] = None,
         env_vars: Optional[Dict[str, str]] = None,
         user: Optional[str] = None,
         cap_add: Optional[List[str]] = None,
@@ -749,6 +748,8 @@ class CmdDockerClient(ContainerClient):
             cmd.append("--detach")
         if ports:
             cmd += ports.to_list()
+        if exposed_ports:
+            cmd += list(itertools.chain.from_iterable(["--expose", port] for port in exposed_ports))
         if env_vars:
             env_flags, env_file = Util.create_env_vars_file_flag(env_vars)
             cmd += env_flags
