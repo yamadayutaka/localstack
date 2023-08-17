@@ -53,9 +53,7 @@ class TestAwsSdk:
             exec_input,
         )
 
-    @pytest.mark.skip(
-        reason="No parameters validation for dynamodb api calls being returned."
-    )
+    @pytest.mark.skip(reason="No parameters validation for dynamodb api calls being returned.")
     @markers.snapshot.skip_snapshot_verify(paths=["$..cause"])
     @markers.aws.unknown
     def test_dynamodb_invalid_param(
