@@ -11,11 +11,6 @@ from tests.aws.stepfunctions.utils import (
     await_execution_terminated,
     await_state_machine_version_listed,
     await_state_machine_version_not_listed,
-    is_legacy_provider,
-)
-
-pytestmark = pytest.mark.skipif(
-    condition=is_legacy_provider(), reason="Test suite for v2 provider only."
 )
 
 

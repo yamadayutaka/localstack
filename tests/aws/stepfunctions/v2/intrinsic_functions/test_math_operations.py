@@ -1,19 +1,14 @@
 import json
 
-import pytest
-
 from localstack.testing.pytest import markers
 from localstack.testing.snapshots.transformer import JsonpathTransformer, RegexTransformer
 from localstack.utils.strings import short_uid
 from tests.aws.stepfunctions.templates.intrinsicfunctions.intrinsic_functions_templates import (
     IntrinsicFunctionTemplate as IFT,
 )
-from tests.aws.stepfunctions.utils import await_execution_success, is_legacy_provider
+from tests.aws.stepfunctions.utils import await_execution_success
 from tests.aws.stepfunctions.v2.intrinsic_functions.utils import create_and_test_on_inputs
 
-pytestmark = pytest.mark.skipif(
-    condition=is_legacy_provider(), reason="Test suite for v2 provider only."
-)
 # TODO: test for validation errors, and boundary testing.
 
 
