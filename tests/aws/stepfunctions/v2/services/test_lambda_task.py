@@ -1,14 +1,16 @@
 import json
 
+import pytest
+
 from localstack.testing.pytest import markers
 from localstack.testing.snapshots.transformer import RegexTransformer
 from localstack.utils.strings import short_uid
 from tests.aws.stepfunctions.lambda_functions import lambda_functions
 from tests.aws.stepfunctions.templates.services.services_templates import ServicesTemplates as ST
-from tests.aws.stepfunctions.utils import create_and_record_execution, is_old_provider
+from tests.aws.stepfunctions.utils import create_and_record_execution, is_legacy_provider
 
 pytestmark = pytest.mark.skipif(
-    condition=is_old_provider(), reason="Test suite for v2 provider only."
+    condition=is_legacy_provider(), reason="Test suite for v2 provider only."
 )
 
 
@@ -49,7 +51,7 @@ class TestTaskLambda:
             exec_input,
         )
 
-    @markers.snapshot.mark.parametrize(
+    @pytest.mark.parametrize(
         "json_value",
         [
             "HelloWorld",

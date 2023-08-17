@@ -6,7 +6,7 @@ from typing import Any, TypedDict
 from localstack.aws.api.stepfunctions import ExecutionStatus
 from localstack.testing.pytest import markers
 from localstack.utils.sync import wait_until
-from tests.aws.stepfunctions.utils import is_old_provider
+from tests.aws.stepfunctions.utils import is_legacy_provider
 
 THIS_FOLDER = Path(os.path.dirname(__file__))
 
@@ -165,7 +165,7 @@ class TestFundamental:
             )
 
     @markers.snapshot.skip_snapshot_verify(
-        condition=is_old_provider, paths=["$..Headers", "$..StatusText"]
+        condition=is_legacy_provider, paths=["$..Headers", "$..StatusText"]
     )
     @markers.aws.validated
     def test_step_functions_calling_api_gateway(

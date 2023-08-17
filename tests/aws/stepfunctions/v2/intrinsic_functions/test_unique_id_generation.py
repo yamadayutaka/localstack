@@ -1,5 +1,7 @@
 import json
 
+import pytest
+
 from localstack.services.stepfunctions.asl.utils.json_path import JSONPathUtils
 from localstack.testing.pytest import markers
 from localstack.testing.snapshots.transformer import RegexTransformer
@@ -7,10 +9,10 @@ from localstack.utils.strings import short_uid
 from tests.aws.stepfunctions.templates.intrinsicfunctions.intrinsic_functions_templates import (
     IntrinsicFunctionTemplate as IFT,
 )
-from tests.aws.stepfunctions.utils import await_execution_success, is_old_provider
+from tests.aws.stepfunctions.utils import await_execution_success, is_legacy_provider
 
 pytestmark = pytest.mark.skipif(
-    condition=is_old_provider(), reason="Test suite for v2 provider only."
+    condition=is_legacy_provider(), reason="Test suite for v2 provider only."
 )
 
 

@@ -1,12 +1,14 @@
 import json
 
+import pytest
+
 from localstack.testing.pytest import markers
 from tests.aws.stepfunctions.conftest import SfnNoneRecursiveParallelTransformer
 from tests.aws.stepfunctions.templates.scenarios.scenarios_templates import ScenariosTemplate as ST
-from tests.aws.stepfunctions.utils import create_and_record_execution, is_old_provider
+from tests.aws.stepfunctions.utils import create_and_record_execution, is_legacy_provider
 
 pytestmark = pytest.mark.skipif(
-    condition=is_old_provider(), reason="Test suite for v2 provider only."
+    condition=is_legacy_provider(), reason="Test suite for v2 provider only."
 )
 
 

@@ -1,13 +1,15 @@
 import json
 
+import pytest
+
 from localstack.testing.pytest import markers
 from localstack.testing.snapshots.transformer import JsonpathTransformer
 from tests.aws.stepfunctions.templates.base.base_templates import BaseTemplate as BT
 from tests.aws.stepfunctions.templates.services.services_templates import ServicesTemplates as ST
-from tests.aws.stepfunctions.utils import create, create_and_record_execution, is_old_provider
+from tests.aws.stepfunctions.utils import create, create_and_record_execution, is_legacy_provider
 
 pytestmark = pytest.mark.skipif(
-    condition=is_old_provider(), reason="Test suite for v2 provider only."
+    condition=is_legacy_provider(), reason="Test suite for v2 provider only."
 )
 
 
