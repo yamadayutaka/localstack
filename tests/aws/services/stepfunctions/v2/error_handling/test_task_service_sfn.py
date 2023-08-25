@@ -7,10 +7,7 @@ from tests.aws.services.stepfunctions.templates.base.base_templates import BaseT
 from tests.aws.services.stepfunctions.templates.services.services_templates import (
     ServicesTemplates as ST,
 )
-from tests.aws.services.stepfunctions.utils import (
-    create,
-    create_and_record_execution,
-)
+from tests.aws.services.stepfunctions.utils import create, create_and_record_execution
 
 
 @markers.snapshot.skip_snapshot_verify(

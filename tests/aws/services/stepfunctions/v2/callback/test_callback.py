@@ -10,10 +10,7 @@ from tests.aws.services.stepfunctions.templates.callbacks.callback_templates imp
 from tests.aws.services.stepfunctions.templates.timeouts.timeout_templates import (
     TimeoutTemplates as TT,
 )
-from tests.aws.services.stepfunctions.utils import (
-    create,
-    create_and_record_execution,
-)
+from tests.aws.services.stepfunctions.utils import create, create_and_record_execution
 
 
 @markers.snapshot.skip_snapshot_verify(

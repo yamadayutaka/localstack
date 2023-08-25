@@ -6,7 +6,6 @@ from typing import Any, TypedDict
 from localstack.aws.api.stepfunctions import ExecutionStatus
 from localstack.testing.pytest import markers
 from localstack.utils.sync import wait_until
-from tests.aws.services.stepfunctions.utils import is_legacy_provider
 
 THIS_FOLDER = Path(os.path.dirname(__file__))
 
@@ -164,9 +163,7 @@ class TestFundamental:
                 aws_client.stepfunctions, sfn_snapshot, statemachine_arn, run_config
             )
 
-    @markers.snapshot.skip_snapshot_verify(
-        condition=is_legacy_provider, paths=["$..Headers", "$..StatusText"]
-    )
+    @markers.snapshot.skip_snapshot_verify(paths=["$..Headers", "$..StatusText"])
     @markers.aws.validated
     def test_step_functions_calling_api_gateway(
         self, deploy_cfn_template, sfn_snapshot, aws_client
@@ -229,11 +226,7 @@ class TestFundamental:
             },
         ]
 
-        self._record_execution(
-            aws_client.stepfunctions, sfn_snapshot, statemachine_arn, run_configs[1]
-        )
-
-        # for run_config in run_configs:
-        #     self._record_execution(
-        #         aws_client.stepfunctions, sfn_snapshot, statemachine_arn, run_config
-        #     )
+        for run_config in run_configs:
+            self._record_execution(
+                aws_client.stepfunctions, sfn_snapshot, statemachine_arn, run_config
+            )
