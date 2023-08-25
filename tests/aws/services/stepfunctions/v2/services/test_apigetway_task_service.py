@@ -229,10 +229,7 @@ class TestTaskApiGateway:
             None,
             "",
             "HelloWorld",
-            json.dumps("HelloWorld"),
-            json.dumps(0),
-            json.dumps(True),
-            json.dumps({"message": "HelloWorld!"}),
+            {"message": "HelloWorld!"},
         ],
     )
     @markers.aws.unknown
