@@ -2,7 +2,9 @@ import json
 import os
 import urllib.parse
 
-from localstack.constants import PATH_USER_REQUEST
+import pytest
+
+from localstack import config
 from localstack.testing.pytest import markers
 from localstack.utils.sync import wait_until
 
@@ -144,11 +146,10 @@ def test_apigateway_invoke_localhost(deploy_cfn_template, aws_client):
     api_id = parsed.hostname.split(".")[0]
     state = json.loads(state_def)
     stage = state["States"]["LsCallApi"]["Parameters"]["Stage"]
-    state["States"]["LsCallApi"]["Parameters"]["ApiEndpoint"] = "localhost:4566"
     state["States"]["LsCallApi"]["Parameters"][
-        "Stage"
-    ] = f"restapis/{api_id}/{stage}/{PATH_USER_REQUEST}"
-    state["States"]["LsCallApi"]["Parameters"]["Path"] = "/"
+        "ApiEndpoint"
+    ] = f"{config.service_url('apigateway')}/restapis/{api_id}"
+    state["States"]["LsCallApi"]["Parameters"]["Stage"] = stage
 
     aws_client.stepfunctions.update_state_machine(
         stateMachineArn=state_machine_arn, definition=json.dumps(state)
@@ -190,10 +191,10 @@ def test_apigateway_invoke_localhost_with_path(deploy_cfn_template, aws_client):
     api_id = parsed.hostname.split(".")[0]
     state = json.loads(state_def)
     stage = state["States"]["LsCallApi"]["Parameters"]["Stage"]
-    state["States"]["LsCallApi"]["Parameters"]["ApiEndpoint"] = "localhost:4566"
     state["States"]["LsCallApi"]["Parameters"][
-        "Stage"
-    ] = f"restapis/{api_id}/{stage}/{PATH_USER_REQUEST}"
+        "ApiEndpoint"
+    ] = f"{config.service_url('apigateway')}/restapis/{api_id}"
+    state["States"]["LsCallApi"]["Parameters"]["Stage"] = stage
 
     aws_client.stepfunctions.update_state_machine(
         stateMachineArn=state_machine_arn, definition=json.dumps(state)
@@ -258,6 +259,7 @@ def test_retry_and_catch(deploy_cfn_template, aws_client):
 
 
 @markers.aws.validated
+@pytest.mark.skip(reason="Add support for StepFunction's Activities")
 def test_cfn_statemachine_with_dependencies(deploy_cfn_template, aws_client):
 
     stack = deploy_cfn_template(

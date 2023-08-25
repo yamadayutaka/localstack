@@ -16,7 +16,7 @@ from localstack.utils.sync import ShortCircuitWaitException, retry, wait_until
 from localstack.utils.threads import parallelize
 from tests.aws.services.lambda_.functions import lambda_environment
 from tests.aws.services.lambda_.test_lambda import TEST_LAMBDA_ENV, TEST_LAMBDA_PYTHON_ECHO
-from tests.aws.services.stepfunctions.utils import is_new_provider
+from tests.aws.services.stepfunctions.utils import is_legacy_provider
 
 THIS_FOLDER = os.path.dirname(os.path.realpath(__file__))
 TEST_LAMBDA_NAME_1 = "lambda_sfn_1"
