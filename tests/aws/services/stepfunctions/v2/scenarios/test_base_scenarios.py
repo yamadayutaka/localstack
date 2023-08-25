@@ -5,11 +5,7 @@ from tests.aws.services.stepfunctions.conftest import SfnNoneRecursiveParallelTr
 from tests.aws.services.stepfunctions.templates.scenarios.scenarios_templates import (
     ScenariosTemplate as ST,
 )
-from tests.aws.services.stepfunctions.utils import create_and_record_execution, is_old_provider
-
-pytestmark = pytest.mark.skipif(
-    condition=is_old_provider(), reason="Test suite for v2 provider only."
-)
+from tests.aws.services.stepfunctions.utils import create_and_record_execution
 
 
 @markers.snapshot.skip_snapshot_verify(

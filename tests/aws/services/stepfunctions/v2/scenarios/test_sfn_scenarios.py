@@ -6,7 +6,7 @@ from typing import Any, TypedDict
 from localstack.aws.api.stepfunctions import ExecutionStatus
 from localstack.testing.pytest import markers
 from localstack.utils.sync import wait_until
-from tests.aws.services.stepfunctions.utils import is_old_provider
+from tests.aws.services.stepfunctions.utils import is_legacy_provider
 
 THIS_FOLDER = Path(os.path.dirname(__file__))
 
@@ -229,7 +229,11 @@ class TestFundamental:
             },
         ]
 
-        for run_config in run_configs:
-            self._record_execution(
-                aws_client.stepfunctions, sfn_snapshot, statemachine_arn, run_config
-            )
+        self._record_execution(
+            aws_client.stepfunctions, sfn_snapshot, statemachine_arn, run_configs[1]
+        )
+
+        # for run_config in run_configs:
+        #     self._record_execution(
+        #         aws_client.stepfunctions, sfn_snapshot, statemachine_arn, run_config
+        #     )

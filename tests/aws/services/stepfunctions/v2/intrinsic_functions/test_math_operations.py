@@ -6,7 +6,7 @@ from localstack.utils.strings import short_uid
 from tests.aws.services.stepfunctions.templates.intrinsicfunctions.intrinsic_functions_templates import (
     IntrinsicFunctionTemplate as IFT,
 )
-from tests.aws.services.stepfunctions.utils import await_execution_success, is_old_provider
+from tests.aws.services.stepfunctions.utils import await_execution_success
 from tests.aws.services.stepfunctions.v2.intrinsic_functions.utils import create_and_test_on_inputs
 
 # TODO: test for validation errors, and boundary testing.

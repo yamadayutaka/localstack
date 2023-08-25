@@ -1,7 +1,6 @@
 from typing import Any, Final
 
 from localstack.testing.pytest import markers
-from tests.aws.services.stepfunctions.utils import is_old_provider
 from tests.aws.services.stepfunctions.v2.choice_operators.utils import (
     create_and_test_comparison_function,
 )

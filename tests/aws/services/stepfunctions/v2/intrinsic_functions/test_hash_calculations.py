@@ -2,7 +2,6 @@ from localstack.testing.pytest import markers
 from tests.aws.services.stepfunctions.templates.intrinsicfunctions.intrinsic_functions_templates import (
     IntrinsicFunctionTemplate as IFT,
 )
-from tests.aws.services.stepfunctions.utils import is_old_provider
 from tests.aws.services.stepfunctions.v2.intrinsic_functions.utils import create_and_test_on_inputs
 
 # TODO: test for validation errors, and boundary testing.
