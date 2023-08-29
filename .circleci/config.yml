@@ -137,8 +137,8 @@ jobs:
       - run:
           name: Test SFN Legacy provider
           environment:
-            PROVIDER_OVERRIDE_STEPFUNCTIONS: "v2"
-            TEST_PATH: "tests/aws/services/stepfunctions/v2/"
+            PROVIDER_OVERRIDE_STEPFUNCTIONS: "legacy"
+            TEST_PATH: "tests/aws/services/stepfunctions/legacy/"
             COVERAGE_ARGS: "-p"
           command: |
             PYTEST_ARGS="${TINYBIRD_PYTEST_ARGS}--reruns 3 --junitxml=target/reports/sfn_v2.xml -o junit_suite_name='sfn_legacy'" make test-coverage
