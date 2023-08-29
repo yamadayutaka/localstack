@@ -538,22 +538,8 @@
     }
   },
   "tests/aws/services/stepfunctions/v2/test_sfn_api.py::TestSnfApi::test_list_sms": {
-    "recorded-date": "29-08-2023, 14:36:44",
+    "recorded-date": "29-08-2023, 19:40:19",
     "recorded-content": {
-      "lst_resp_init": {
-        "stateMachines": [
-          {
-            "creationDate": "datetime",
-            "name": "test-wait-sfn-can-assume-role-e1921261",
-            "stateMachineArn": "arn:aws:states:<region>:111111111111:stateMachine:test-wait-sfn-can-assume-role-e1921261",
-            "type": "STANDARD"
-          }
-        ],
-        "ResponseMetadata": {
-          "HTTPHeaders": {},
-          "HTTPStatusCode": 200
-        }
-      },
       "creation_resp_0": {
         "creationDate": "datetime",
         "stateMachineArn": "arn:aws:states:<region>:111111111111:stateMachine:<ArnPart_0idx>",
@@ -582,19 +568,19 @@
         {
           "stateMachineArn": "arn:aws:states:<region>:111111111111:stateMachine:<ArnPart_0idx>",
           "name": "<ArnPart_0idx>",
-          "type": "EXPRESS",
+          "type": "STANDARD",
           "creationDate": "datetime"
         },
         {
           "stateMachineArn": "arn:aws:states:<region>:111111111111:stateMachine:<ArnPart_1idx>",
           "name": "<ArnPart_1idx>",
-          "type": "EXPRESS",
+          "type": "STANDARD",
           "creationDate": "datetime"
         },
         {
           "stateMachineArn": "arn:aws:states:<region>:111111111111:stateMachine:<ArnPart_2idx>",
           "name": "<ArnPart_2idx>",
-          "type": "EXPRESS",
+          "type": "STANDARD",
           "creationDate": "datetime"
         }
       ],

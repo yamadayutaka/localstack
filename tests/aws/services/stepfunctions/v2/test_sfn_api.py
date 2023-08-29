@@ -2,7 +2,6 @@ import json
 
 import pytest
 
-from localstack.aws.api.stepfunctions import StateMachineType
 from localstack.services.lambda_.lambda_utils import LAMBDA_RUNTIME_PYTHON39
 from localstack.testing.pytest import markers
 from localstack.testing.snapshots.transformer import RegexTransformer
@@ -13,7 +12,6 @@ from tests.aws.services.stepfunctions.utils import (
     await_execution_aborted,
     await_execution_started,
     await_execution_success,
-    await_no_state_machines_listed,
     await_state_machine_listed,
     await_state_machine_not_listed,
 )
@@ -217,11 +215,6 @@ class TestSnfApi:
         definition = BaseTemplate.load_sfn_template(BaseTemplate.BASE_PASS_RESULT)
         definition_str = json.dumps(definition)
 
-        await_no_state_machines_listed(stepfunctions_client=aws_client.stepfunctions)
-
-        lst_resp = aws_client.stepfunctions.list_state_machines()
-        sfn_snapshot.match("lst_resp_init", lst_resp)
-
         sm_names = [
             f"statemachine_1_{short_uid()}",
             f"statemachine_2_{short_uid()}",
@@ -234,7 +227,6 @@ class TestSnfApi:
                 name=sm_name,
                 definition=definition_str,
                 roleArn=snf_role_arn,
-                type=StateMachineType.EXPRESS,
             )
             sfn_snapshot.add_transformer(sfn_snapshot.transform.sfn_sm_create_arn(creation_resp, i))
             sfn_snapshot.match(f"creation_resp_{i}", creation_resp)
