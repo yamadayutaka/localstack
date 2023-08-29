@@ -176,7 +176,7 @@ class TestSnfApi:
             create_state_machine(name=sm_name, definition=definition_str_2, roleArn=snf_role_arn)
         sfn_snapshot.match("already_exists_1", resource_not_found.value.response)
 
-    @markers.aws.unknown
+    @markers.aws.validated
     def test_create_duplicate_sm_name(
         self, create_iam_role_for_sfn, create_state_machine, sfn_snapshot, aws_client
     ):
@@ -244,8 +244,10 @@ class TestSnfApi:
             await_state_machine_listed(
                 stepfunctions_client=aws_client.stepfunctions, state_machine_arn=state_machine_arn
             )
-            lst_resp = aws_client.stepfunctions.list_state_machines()
-            sfn_snapshot.match(f"lst_resp_{i}", lst_resp)
+
+        lst_resp = aws_client.stepfunctions.list_state_machines()
+        lst_resp_filter = [sm for sm in lst_resp["stateMachines"] if sm["name"] in sm_names]
+        sfn_snapshot.match("lst_resp_filter", lst_resp_filter)
 
         for i, state_machine_arn in enumerate(state_machine_arns):
             deletion_resp = aws_client.stepfunctions.delete_state_machine(
@@ -257,11 +259,9 @@ class TestSnfApi:
                 stepfunctions_client=aws_client.stepfunctions, state_machine_arn=state_machine_arn
             )
 
-            lst_resp = aws_client.stepfunctions.list_state_machines()
-            sfn_snapshot.match(f"lst_resp_del_{i}", lst_resp)
-
         lst_resp = aws_client.stepfunctions.list_state_machines()
-        sfn_snapshot.match("lst_resp_del_end", lst_resp)
+        lst_resp_filter = [sm for sm in lst_resp["stateMachines"] if sm["name"] in sm_names]
+        sfn_snapshot.match("lst_resp_del_filter", lst_resp_filter)
 
     @markers.aws.unknown
     def test_start_execution(
