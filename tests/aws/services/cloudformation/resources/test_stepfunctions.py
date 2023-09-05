@@ -4,7 +4,7 @@ import urllib.parse
 
 import pytest
 
-from localstack.constants import PATH_USER_REQUEST
+from localstack import config
 from localstack.testing.pytest import markers
 from localstack.utils.sync import wait_until
 from tests.aws.services.stepfunctions.utils import await_execution_terminated
