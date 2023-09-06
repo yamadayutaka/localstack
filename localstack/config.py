@@ -646,6 +646,9 @@ GATEWAY_LISTEN: List[HostAndPort]
     EDGE_PORT_HTTP,
 ) = populate_legacy_edge_configuration(os.environ)
 
+# internal flag: enable the use of LOCALSTACK_HOST for URLs
+USE_LOCALSTACK_HOST = is_env_true("USE_LOCALSTACK_HOST")
+
 # optional target URL to forward all edge requests to
 EDGE_FORWARD_URL = os.environ.get("EDGE_FORWARD_URL", "").strip()
 
