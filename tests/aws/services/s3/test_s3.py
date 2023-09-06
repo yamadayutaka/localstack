@@ -10025,9 +10025,7 @@ def _bucket_url_vhost(bucket_name: str, region: str = "", localstack_host: str =
         host_and_port = f"{localstack_host}:{config.get_edge_port_http()}"
     else:
         host_and_port = (
-            f"s3.{region}.{host_definition.host_and_port()}"
-            if region != "us-east-1"
-            else f"s3.{host_definition.host_and_port()}"
+            f"s3.{region}.{host_definition}" if region != "us-east-1" else f"s3.{host_definition}"
         )
 
     # TODO might add the region here
