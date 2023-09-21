@@ -22,6 +22,7 @@ from pytest_httpserver import HTTPServer
 from werkzeug import Request, Response
 
 from localstack import config, constants
+from localstack.config import HostAndPort
 from localstack.services.stores import (
     AccountRegionBundle,
     BaseStore,
@@ -1905,6 +1906,7 @@ def appsync_create_api(aws_client):
 
 @pytest.fixture
 def assert_host_customisation(monkeypatch):
+    localstack_host = f"localstack-host-{short_uid()}"
     hostname_external = f"external-host-{short_uid()}"
     # `LOCALSTACK_HOSTNAME` is really an internal variable that has been
     # exposed to the user at some point in the past. It is used by some
@@ -1921,6 +1923,7 @@ def assert_host_customisation(monkeypatch):
     localstack_hostname = socket.gethostname()
     monkeypatch.setattr(config, "HOSTNAME_EXTERNAL", hostname_external)
     monkeypatch.setattr(config, "LOCALSTACK_HOSTNAME", localstack_hostname)
+    monkeypatch.setattr(config, "LOCALSTACK_HOST", HostAndPort(host=localstack_host, port=4566))
 
     def asserter(
         url: str,
@@ -1931,7 +1934,14 @@ def assert_host_customisation(monkeypatch):
         use_localhost: bool = False,
         custom_host: Optional[str] = None,
     ):
-        if use_hostname_external:
+        if config.USE_LOCALSTACK_HOST:
+            assert localstack_host in url
+
+            assert hostname_external not in url
+            assert localstack_hostname not in url
+            assert constants.LOCALHOST_HOSTNAME not in url
+            assert constants.LOCALHOST not in url
+        elif use_hostname_external:
             assert hostname_external in url
 
             assert localstack_hostname not in url
