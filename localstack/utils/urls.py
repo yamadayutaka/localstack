@@ -16,6 +16,7 @@ def localstack_host(
     use_hostname_external: bool = False,
     use_localstack_hostname: bool = False,
     use_localhost_cloud: bool = False,
+    custom_host: str | None = None,
     custom_port: Optional[int] = None,
 ) -> HostAndPort:
     """
@@ -27,6 +28,12 @@ def localstack_host(
     if custom_port is not None:
         port = custom_port
 
+    if config.USE_LOCALSTACK_HOST:
+        host = config.LOCALSTACK_HOST
+        if custom_port:
+            host.port = port
+        return host
+
     host = config.LOCALHOST
     if use_hostname_external:
         host = config.HOSTNAME_EXTERNAL
@@ -34,5 +41,7 @@ def localstack_host(
         host = config.LOCALSTACK_HOSTNAME
     elif use_localhost_cloud:
         host = constants.LOCALHOST_HOSTNAME
+    elif custom_host:
+        host = custom_host
 
     return HostAndPort(host=host, port=port)
