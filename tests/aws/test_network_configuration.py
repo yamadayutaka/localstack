@@ -21,6 +21,18 @@ from localstack.utils.files import new_tmp_file, save_file
 from localstack.utils.strings import short_uid
 
 
+@pytest.fixture(
+    autouse=True,
+    params=[False, True],
+    ids=["without-localstack-host", "with-localstack-host"],
+)
+def use_localstack_host(monkeypatch, request):
+    use_localstack_host = request.param
+    if use_localstack_host:
+        monkeypatch.setenv("USE_LOCALSTACK_HOST", "1")
+        monkeypatch.setattr(config, "USE_LOCALSTACK_HOST", True)
+
+
 class TestOpenSearch:
     """
     OpenSearch does not respect any customisations and just returns a domain with localhost.localstack.cloud in.
