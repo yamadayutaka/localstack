@@ -11,7 +11,7 @@ from tests.aws.services.stepfunctions.v2.intrinsic_functions.utils import create
     paths=["$..loggingConfiguration", "$..tracingConfiguration", "$..previousEventId"]
 )
 class TestHashCalculations:
-    @markers.aws.unknown
+    @markers.aws.validated
     def test_hash(self, create_iam_role_for_sfn, create_state_machine, sfn_snapshot, aws_client):
         hash_bindings = [
             ("input data", "MD5"),

@@ -21,7 +21,7 @@ from tests.aws.services.stepfunctions.utils import create, create_and_record_exe
     ]
 )
 class TestTaskServiceSfn:
-    @markers.aws.unknown
+    @markers.aws.validated
     def test_start_execution_no_such_arn(
         self,
         aws_client,

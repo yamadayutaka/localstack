@@ -20,7 +20,7 @@ from tests.aws.services.stepfunctions.utils import create_and_record_execution
 )
 class TestHeartbeats:
     @markers.snapshot.skip_snapshot_verify(paths=["$..MD5OfMessageBody"])
-    @markers.aws.unknown
+    @markers.aws.needs_fixing
     def test_heartbeat_timeout(
         self,
         aws_client,
@@ -59,7 +59,7 @@ class TestHeartbeats:
         )
 
     @markers.snapshot.skip_snapshot_verify(paths=["$..MD5OfMessageBody"])
-    @markers.aws.unknown
+    @markers.aws.needs_fixing
     def test_heartbeat_path_timeout(
         self,
         aws_client,
@@ -102,7 +102,7 @@ class TestHeartbeats:
         )
 
     @markers.snapshot.skip_snapshot_verify(paths=["$..MD5OfMessageBody"])
-    @markers.aws.unknown
+    @markers.aws.needs_fixing
     def test_heartbeat_no_timeout(
         self,
         aws_client,

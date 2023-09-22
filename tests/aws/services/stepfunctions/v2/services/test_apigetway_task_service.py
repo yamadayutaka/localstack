@@ -182,7 +182,7 @@ class TestTaskApiGateway:
             invocation_url = f"{config.service_url('apigateway')}/restapis/{api_id}"
         return invocation_url, stage_name
 
-    @markers.aws.unknown
+    @markers.aws.validated
     def test_invoke_base(
         self,
         aws_client,
@@ -232,7 +232,7 @@ class TestTaskApiGateway:
             {"message": "HelloWorld!"},
         ],
     )
-    @markers.aws.unknown
+    @markers.aws.validated
     def test_invoke_with_body_post(
         self,
         aws_client,
@@ -287,7 +287,7 @@ class TestTaskApiGateway:
             "$..output.ResponseBody"
         ]
     )
-    @markers.aws.unknown
+    @markers.aws.validated
     def test_invoke_with_query_parameters(
         self,
         aws_client,
@@ -345,7 +345,7 @@ class TestTaskApiGateway:
             "$..cause",
         ]
     )
-    @markers.aws.unknown
+    @markers.aws.validated
     def test_invoke_error(
         self,
         aws_client,

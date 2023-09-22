@@ -445,8 +445,8 @@ def backend_update_secret(
     return json.dumps(resp)
 
 
-@patch(SecretsManagerResponse.update_secret)
-def response_update_secret(_, self):
+@patch(SecretsManagerResponse.update_secret, pass_target=False)
+def response_update_secret(self):
     secret_id = self._get_param("SecretId")
     description = self._get_param("Description")
     secret_string = self._get_param("SecretString")
@@ -496,6 +496,7 @@ def backend_update_secret_version_stage(
 @patch(FakeSecret.reset_default_version)
 def fake_secret_reset_default_version(fn, self, secret_version, version_id):
     fn(self, secret_version, version_id)
+
     # Remove versions with no version stages.
     versions_no_stages = [
         version_id for version_id, version in self.versions.items() if not version["version_stages"]

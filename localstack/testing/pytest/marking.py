@@ -1,7 +1,7 @@
 """
 Custom pytest mark typings
 """
-from typing import Any, Callable, List, Optional
+from typing import TYPE_CHECKING, Callable, List, Optional
 
 import pytest
 
@@ -55,6 +55,9 @@ class Markers:
     multiruntime: MultiRuntimeMarker = pytest.mark.multiruntime
 
     # test selection
+    acceptance_test_beta = (
+        pytest.mark.acceptance_test
+    )  # for now with a _beta suffix to make clear they are not really used as acceptance tests yet
     skip_offline = pytest.mark.skip_offline
     only_on_amd64 = pytest.mark.only_on_amd64
     resource_heavy = pytest.mark.resource_heavy
@@ -62,14 +65,17 @@ class Markers:
 
 
 # pytest plugin
+if TYPE_CHECKING:
+    from _pytest.config import Config
 
 
 @pytest.hookimpl
 def pytest_collection_modifyitems(
-    session: pytest.Session, config: Any, items: List[pytest.Item]
+    session: pytest.Session, config: "Config", items: List[pytest.Item]
 ) -> None:
     """Enforce that each test has exactly one aws compatibility marker"""
     marker_errors = []
+
     for item in items:
         # we should only concern ourselves with tests in tests/aws/
         if "tests/aws" not in item.fspath.dirname:

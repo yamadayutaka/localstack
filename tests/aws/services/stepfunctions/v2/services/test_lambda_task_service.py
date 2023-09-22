@@ -3,6 +3,7 @@ import json
 import pytest
 
 from localstack.aws.api.lambda_ import LogType
+from localstack.testing.aws.util import is_aws_cloud
 from localstack.testing.pytest import markers
 from localstack.testing.snapshots.transformer import JsonpathTransformer, RegexTransformer
 from localstack.utils.strings import short_uid
@@ -23,7 +24,7 @@ from tests.aws.services.stepfunctions.utils import create_and_record_execution
     ]
 )
 class TestTaskServiceLambda:
-    @markers.aws.unknown
+    @markers.aws.validated
     def test_invoke(
         self,
         aws_client,
@@ -53,7 +54,7 @@ class TestTaskServiceLambda:
             exec_input,
         )
 
-    @markers.aws.unknown
+    @markers.aws.validated
     def test_invoke_bytes_payload(
         self,
         aws_client,
@@ -86,7 +87,7 @@ class TestTaskServiceLambda:
         )
 
     # AWS's stepfuctions documentation seems to incorrectly classify LogType parameters as unsupported.
-    @markers.aws.unknown
+    @markers.aws.validated
     def test_invoke_unsupported_param(
         self,
         aws_client,
@@ -133,7 +134,7 @@ class TestTaskServiceLambda:
             [],
         ],
     )
-    @markers.aws.unknown
+    @markers.aws.validated
     def test_invoke_json_values(
         self,
         aws_client,
@@ -167,8 +168,11 @@ class TestTaskServiceLambda:
             exec_input,
         )
 
-    @pytest.mark.skip(reason="Add support for Invalid State Machine Definition errors")
-    @markers.aws.unknown
+    @pytest.mark.skipif(
+        condition=not is_aws_cloud(),
+        reason="Add support for Invalid State Machine Definition errors",
+    )
+    @markers.aws.needs_fixing
     def test_list_functions(
         self,
         aws_client,

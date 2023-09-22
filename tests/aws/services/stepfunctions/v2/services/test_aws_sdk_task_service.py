@@ -20,7 +20,7 @@ from tests.aws.services.stepfunctions.utils import create_and_record_execution
 )
 class TestTaskServiceAwsSdk:
     @markers.snapshot.skip_snapshot_verify(paths=["$..SecretList"])
-    @markers.aws.unknown
+    @markers.aws.validated
     def test_list_secrets(
         self, aws_client, create_iam_role_for_sfn, create_state_machine, sfn_snapshot
     ):

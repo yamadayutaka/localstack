@@ -16,7 +16,7 @@ from tests.aws.services.stepfunctions.v2.intrinsic_functions.utils import create
     paths=["$..loggingConfiguration", "$..tracingConfiguration", "$..previousEventId"]
 )
 class TestMathOperations:
-    @markers.aws.unknown
+    @markers.aws.validated
     def test_math_random(
         self, create_iam_role_for_sfn, create_state_machine, sfn_snapshot, aws_client
     ):
@@ -69,7 +69,7 @@ class TestMathOperations:
             )
             sfn_snapshot.match(f"exec_hist_resp_{i}", exec_hist_resp)
 
-    @markers.aws.unknown
+    @markers.aws.validated
     def test_math_random_seeded(
         self, create_iam_role_for_sfn, create_state_machine, sfn_snapshot, aws_client
     ):
@@ -117,11 +117,35 @@ class TestMathOperations:
         exec_hist_resp = aws_client.stepfunctions.get_execution_history(executionArn=execution_arn)
         sfn_snapshot.match("exec_hist_resp", exec_hist_resp)
 
-    @markers.aws.unknown
+    @markers.aws.validated
     def test_math_add(
         self, create_iam_role_for_sfn, create_state_machine, sfn_snapshot, aws_client
     ):
-        add_tuples = [(-9, 3), (1.49, 1.50), (1.50, 1.51), (-1.49, -1.50), (-1.50, -1.51)]
+        add_tuples = [
+            (-9, 3),
+            (1.49, 1.50),
+            (1.50, 1.51),
+            (-1.49, -1.50),
+            (-1.50, -1.51),
+            (1.49, 0),
+            (1.49, -1.49),
+            (1.50, 0),
+            (1.51, 0),
+            (-1.49, 0),
+            (-1.50, 0),
+            (-1.51, 0),
+            # below are cases specifically to verify java vs. python rounding
+            # python by default would round to even
+            (0.5, 0),  # python: 0, # java: 1
+            (1.5, 0),  # python: 2, # java: 2
+            (2.5, 0),  # python: 2, # java: 3
+            (3.5, 0),  # python: 4, # java: 4
+            (-0.5, 0.5),  # python: 0, # java: 1
+            (-0.5, 0),  # python: 0, # java: -1
+            (-1.5, 0),  # python: -2, # java: -2
+            (-2.5, 0),  # python: -2, # java: -3
+            (-3.5, 0),  # python: -4, # java: -4
+        ]
         input_values = list()
         for fst, snd in add_tuples:
             input_values.append({"fst": fst, "snd": snd})
