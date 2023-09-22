@@ -140,7 +140,7 @@ jobs:
             COVERAGE_ARGS: "-p"
           command: |
             COVERAGE_FILE="target/coverage/.coverage.sfnlegacy.${CIRCLE_NODE_INDEX}" \
-            PYTEST_ARGS="${TINYBIRD_PYTEST_ARGS}--reruns 3 --junitxml=target/reports/sfn_v2.xml -o junit_suite_name='sfn_legacy'" \
+            PYTEST_ARGS="${TINYBIRD_PYTEST_ARGS}--reruns 3 --junitxml=target/reports/sfn_legacy.xml -o junit_suite_name='sfn_legacy'" \
             make test-coverage
       - persist_to_workspace:
           root:
