@@ -47,13 +47,18 @@ class Directories(NamedTuple):
     backup: str
 
 
-def get_cluster_health_status(url: str, auth: Tuple[str, str] | None) -> Optional[str]:
+def get_cluster_health_status(
+    url: str, auth: Tuple[str, str] | None, host: str | None = None
+) -> Optional[str]:
     """
     Queries the health endpoint of OpenSearch/Elasticsearch and returns either the status ('green', 'yellow',
     ...) or None if the response returned a non-200 response.
     Authentication needs to be set in case the security plugin is enabled.
     """
-    resp = requests.get(url + "/_cluster/health", verify=False, auth=auth)
+    headers = {}
+    if host:
+        headers["Host"] = host
+    resp = requests.get(url + "/_cluster/health", verify=False, auth=auth, headers=headers)
 
     if resp and resp.ok:
         opensearch_status = resp.json()
@@ -594,7 +599,9 @@ class EdgeProxiedOpensearchCluster(Server):
 
     def health(self):
         """calls the health endpoint of cluster through the proxy, making sure implicitly that both are running"""
-        return get_cluster_health_status(self.url, self.auth)
+        host = self._url.hostname
+        url = "http://localhost.localstack.cloud:4566"
+        return get_cluster_health_status(url, self.auth, host=host)
 
     def _backend_cluster(self) -> OpensearchCluster:
         return OpensearchCluster(
