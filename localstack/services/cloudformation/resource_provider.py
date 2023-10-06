@@ -59,9 +59,13 @@ PROVIDER_DEFAULTS = {
     "AWS::Scheduler::ScheduleGroup": "ResourceProvider",
     "AWS::Route53::HealthCheck": "ResourceProvider",
     "AWS::Route53::RecordSet": "ResourceProvider",
-    "AWS::SNS::Topic": "ResourceProvider"
-    # "AWS::SSM::Parameter": "GenericBaseModel",
-    # "AWS::OpenSearchService::Domain": "GenericBaseModel",
+    "AWS::SNS::Topic": "ResourceProvider",
+    "AWS::Kinesis::Stream": "ResourceProvider",
+    "AWS::Kinesis::StreamConsumer": "ResourceProvider",
+    "AWS::KinesisFirehose::DeliveryStream": "ResourceProvider",
+    "AWS::DynamoDB::Table": "ResourceProvider",
+    "AWS::CloudWatch::Alarm": "ResourceProvider",
+    "AWS::CloudWatch::CompositeAlarm": "ResourceProvider",
 }
 
 
