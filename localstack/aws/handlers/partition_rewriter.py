@@ -257,13 +257,8 @@ class ArnPartitionRewriteHandler(Handler):
             try:
                 partition = self._get_partition_for_region(request_region)
             except self.InvalidRegionException:
-                try:
-                    # If the region is not properly set (f.e. because it is set to a wildcard),
-                    # the partition is determined based on the default region.
-                    partition = self._get_partition_for_region(config.DEFAULT_REGION)
-                except self.InvalidRegionException:
-                    # If it also fails with the DEFAULT_REGION, we use us-east-1 as a fallback
-                    partition = self._get_partition_for_region(AWS_REGION_US_EAST_1)
+                # Use us-east-1 as a fallback
+                partition = self._get_partition_for_region(AWS_REGION_US_EAST_1)
         return partition
 
     @staticmethod

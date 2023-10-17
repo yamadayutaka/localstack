@@ -24,6 +24,7 @@ from localstack.aws.api import CommonServiceException
 from localstack.aws.connect import connect_to
 from localstack.aws.protocol.serializer import gen_amzn_requestid
 from localstack.config import get_protocol as get_service_protocol
+from localstack.constants import AWS_REGION_US_EAST_1
 from localstack.services.generic_proxy import ProxyListener
 from localstack.services.generic_proxy import append_cors_headers as _append_default_cors_headers
 from localstack.services.generic_proxy import is_cors_origin_allowed
@@ -400,7 +401,7 @@ def send_notification_for_subscriber(
         s3api_client = connect_to().s3
         region = (
             s3api_client.get_bucket_location(Bucket=bucket_name)["LocationConstraint"]
-            or config.DEFAULT_REGION
+            or AWS_REGION_US_EAST_1
         )
         events_client = connect_to(region_name=region).events
 
