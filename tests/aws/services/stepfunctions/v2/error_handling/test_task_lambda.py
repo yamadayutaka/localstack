@@ -13,7 +13,6 @@ from tests.aws.services.stepfunctions.utils import create_and_record_execution
     paths=[
         "$..loggingConfiguration",
         "$..tracingConfiguration",
-        "$..previousEventId",
         "$..cause",
         "$..Cause",
     ]

@@ -12,9 +12,7 @@ from tests.aws.services.stepfunctions.templates.timeouts.timeout_templates impor
 from tests.aws.services.stepfunctions.utils import create_and_record_execution
 
 
-@markers.snapshot.skip_snapshot_verify(
-    paths=["$..loggingConfiguration", "$..tracingConfiguration", "$..previousEventId"]
-)
+@markers.snapshot.skip_snapshot_verify(paths=["$..loggingConfiguration", "$..tracingConfiguration"])
 class TestTaskServiceLambda:
     @markers.aws.validated
     def test_raise_exception(

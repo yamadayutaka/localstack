@@ -12,9 +12,7 @@ from tests.aws.services.stepfunctions.templates.services.services_templates impo
 from tests.aws.services.stepfunctions.utils import create_and_record_execution
 
 
-@markers.snapshot.skip_snapshot_verify(
-    paths=["$..loggingConfiguration", "$..tracingConfiguration", "$..previousEventId"]
-)
+@markers.snapshot.skip_snapshot_verify(paths=["$..loggingConfiguration", "$..tracingConfiguration"])
 class TestTaskLambda:
     @markers.aws.validated
     def test_invoke_bytes_payload(

@@ -31,6 +31,10 @@ def is_legacy_provider():
     )
 
 
+def is_not_legacy_provider():
+    return not is_legacy_provider()
+
+
 def await_no_state_machines_listed(stepfunctions_client):
     def _is_empty_state_machine_list():
         lst_resp = stepfunctions_client.list_state_machines()

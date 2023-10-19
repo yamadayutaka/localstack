@@ -13,7 +13,6 @@ from tests.aws.services.stepfunctions.utils import create, create_and_record_exe
     paths=[
         "$..loggingConfiguration",
         "$..tracingConfiguration",
-        "$..previousEventId",
         # TODO: add support for Sdk Http metadata.
         "$..SdkHttpMetadata",
         "$..SdkResponseMetadata",

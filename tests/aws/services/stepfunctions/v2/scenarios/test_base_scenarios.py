@@ -17,9 +17,7 @@ from tests.aws.services.stepfunctions.utils import (
 )
 
 
-@markers.snapshot.skip_snapshot_verify(
-    paths=["$..loggingConfiguration", "$..tracingConfiguration", "$..previousEventId"]
-)
+@markers.snapshot.skip_snapshot_verify(paths=["$..loggingConfiguration", "$..tracingConfiguration"])
 class TestBaseScenarios:
     @markers.aws.validated
     def test_parallel_state(

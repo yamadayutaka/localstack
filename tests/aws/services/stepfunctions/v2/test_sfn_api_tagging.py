@@ -9,9 +9,7 @@ from localstack.utils.strings import short_uid
 from tests.aws.services.stepfunctions.templates.base.base_templates import BaseTemplate
 
 
-@markers.snapshot.skip_snapshot_verify(
-    paths=["$..loggingConfiguration", "$..tracingConfiguration", "$..previousEventId"]
-)
+@markers.snapshot.skip_snapshot_verify(paths=["$..loggingConfiguration", "$..tracingConfiguration"])
 class TestSnfApiTagging:
     @markers.aws.validated
     @pytest.mark.parametrize(
