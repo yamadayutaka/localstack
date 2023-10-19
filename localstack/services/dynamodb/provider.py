@@ -919,6 +919,7 @@ class DynamoDBProvider(DynamodbApi, ServiceLifecycleHook):
         # determine and forward stream records
         request_items = batch_write_item_input["RequestItems"]
         records, unprocessed_items = self.prepare_batch_write_item_records(
+            account_id=context.account_id,
             region_name=context.region,
             request_items=request_items,
             unprocessed_put_items=unprocessed_put_items,
