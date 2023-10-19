@@ -433,7 +433,7 @@ def start_proxy(
 ) -> FuncThread:
     """
     Starts a TCP proxy to perform a low-level forwarding of incoming requests.
-    The proxy's source port (given as method argument) is bound to the EDGE_BIND_HOST.
+    The proxy's source port (given as method argument) is bound to GATEWAY_LISTEN[0].host.
     The target IP is always 127.0.0.1.
     The target port is parsed from the EDGE_FORWARD_URL (for compatibility with the legacy edge proxy forwarding).
     All other parts of the EDGE_FORWARD_URL are _not_ used any more.
